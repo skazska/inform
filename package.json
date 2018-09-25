@@ -1,0 +1,29 @@
+{
+  "name": "@skazska/inform",
+  "preferGlobal": true,
+  "bin": "./index.js",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skazska/inform.git"
+  },
+  "author": "skazska@gmail.com",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/skazska/inform/issues"
+  },
+  "homepage": "https://github.com/skazska/inform#readme",
+  "dependencies": {
+    "rxjs": "^6.3.2"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^5.2.0"
+  }
+}
