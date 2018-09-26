@@ -35,8 +35,38 @@ describe('Informer', () => {
             expect(informer.statusText).to.be.equal('waiting');
             expect(informer.textInfo).to.be.eql({status: 'waiting', text: 'it'});
         });
-        it('should have statusSubject property which provides new infos on subscribed ', () => {
-            const promise = new Promise(resolve => setImmediate(resolve, 'something'));
+        it('should have statusSubject property which provides new infos on subscribed ', (done) => {
+            const promise = new Promise((resolve, reject )=> setImmediate(reject, new Error('error')));
+            const informer = new Informer(null, {
+                failText: 'damn',
+                pendingText: 'waiting',
+                inProcessText: 'doing',
+                doneText: 'did',
+                text: 'it'
+            });
+            const statuses = [0, 2, 1];
+            const statusTexts = ['damn', 'doing', 'waiting'];
+
+            informer.statusSubject.subscribe({
+                next: value => {
+                    expect(value).equal(statuses.pop());
+                    expect(informer.status).equal(value);
+                    expect(informer.statusText).to.be.equal(statusTexts.pop());
+                    expect(informer.textInfo).to.be.eql({status: informer.statusText, text: 'it'});
+                },
+                complete: () => {
+                    expect(informer.status).equal(0);
+                    expect(informer.statusText).to.be.equal('damn');
+                    expect(informer.textInfo).to.be.eql({status: informer.statusText, text: 'it'});
+                    done();
+                }
+            });
+
+            informer.task = promise;
+
+        });
+        it('should have statusSubject property which provides new infos on subscribed 2', (done) => {
+            const promise = new Promise(resolve => setImmediate(resolve, 'bingo'));
             const informer = new Informer(promise, {
                 failText: 'damn',
                 pendingText: 'waiting',
@@ -44,23 +74,23 @@ describe('Informer', () => {
                 doneText: 'did',
                 text: 'it'
             });
-            const statuses = [0, 2];
-            const statusNames = ['failed', 'in-process'];
+            const statuses = [3, 2];
+            const statusTexts = ['did', 'doing'];
 
             informer.statusSubject.subscribe({
                 next: value => {
-                    expect(pts.status).equal(statuses.pop());
-                    expect(pts.statusName).equal(statusNames.pop());
+                    expect(value).equal(statuses.pop());
+                    expect(informer.status).equal(value);
+                    expect(informer.statusText).to.be.equal(statusTexts.pop());
+                    expect(informer.textInfo).to.be.eql({status: informer.statusText, text: 'it'});
                 },
                 complete: () => {
-                    expect(pts.status).equal(0);
-                    expect(pts.statusName).equal('failed');
+                    expect(informer.status).equal(3);
+                    expect(informer.statusText).to.be.equal('did');
+                    expect(informer.textInfo).to.be.eql({status: informer.statusText, text: 'it'});
+                    done();
                 }
             });
-            expect(informer.status).to.be.equal(2);
-            expect(informer.statusText).to.be.equal('doing');
-            expect(informer.textInfo).to.be.eql({status: 'doing', text: 'it'});
-            return expect(promise).to.be.fulfilled;
         });
     });
 });
