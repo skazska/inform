@@ -25,21 +25,19 @@ describe('TaskStatus', () => {
             //just done test here
             return expect(promise).to.be.fulfilled;
         });
-        it('should have subscribable subject, which delivers status on change and complete on promise task resolve', (done) => {
+        it('should emit "change", which delivers a status change and "complete" on task done', (done) => {
             const pts = new TaskStatus();
-            expect(pts).to.have.property('subject');
-            expect(pts.subject).to.have.property('subscribe');
+            expect(pts.status).equal(1);
+            expect(pts.statusName).equal('pending');
 
-            let status = 1;
-            pts.subject._subscribe({
-                next: value => {
-                    expect(value).to.be.equal(status++);
-                },
-                complete: () => {
-                    expect(pts.status).equal(3);
-                    expect(pts.statusName).equal('done');
-                    done();
-                }
+            let status = 2;
+            pts.on('change', value => {
+                expect(value).to.be.equal(status++);
+            });
+            pts.on('end', () => {
+                expect(pts.status).equal(3);
+                expect(pts.statusName).equal('done');
+                done();
             });
 
             pts.task = new Promise((resolve) => {
@@ -56,17 +54,19 @@ describe('TaskStatus', () => {
             });
             const pts = new TaskStatus();
             pts.task = promise;
-            const statuses = [0, 2];
-            const statusNames = ['failed', 'in-process'];
-            pts.subject._subscribe({
-                next: value => {
-                    expect(pts.status).equal(statuses.pop());
-                    expect(pts.statusName).equal(statusNames.pop());
-                },
-                complete: () => {
-                    expect(pts.status).equal(0);
-                    expect(pts.statusName).equal('failed');
-                }
+            expect(pts.status).equal(2);
+            expect(pts.statusName).equal('in-process');
+
+
+            const statuses = [0];
+            const statusNames = ['failed'];
+            pts.on('change', value => {
+                expect(pts.status).equal(statuses.pop());
+                expect(pts.statusName).equal(statusNames.pop());
+            });
+            pts.on('end', () => {
+                expect(pts.status).equal(0);
+                expect(pts.statusName).equal('failed');
             });
 
             return expect(promise).to.be.rejectedWith(Error);

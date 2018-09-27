@@ -1,9 +1,10 @@
+const EventEmitter = require('events');
 const TaskStatus = require('./task-status');
 
 /**
  * produces text info for task
  */
-class Informer {
+class Informer extends EventEmitter {
     /**
      * @typedef {Object} Informer~Options
      * @property {string} failText - .
@@ -17,6 +18,7 @@ class Informer {
      * @param {Informer~Options} options
      */
     constructor (task, options) {
+        super();
         this.text = options.text;
         this.statusTexts = [
             options.failText || TaskStatus.statusName(0),
@@ -35,13 +37,6 @@ class Informer {
      */
     set task (task) {
         this.taskStatus.task = task;
-    }
-
-    /**
-     * @return {BehaviorSubject}
-     */
-    get statusSubject () {
-        return this.taskStatus && this.taskStatus.subject;
     }
 
     /**
@@ -75,21 +70,18 @@ class Informer {
 }
 
 class Group extends Informer {
-    constructor (text) {
-        const promise = new Promise();
-        super(promise, {text: text});
-        this.promise = promise;
+    constructor (options) {
+        super(null, options);
         this.informers = [];
     }
 
-    done(text) {
-        this.text = text;
-        this.promise.resolve(true);
-    }
-
-    fail(text) {
-        this.text = text;
-        this.promise.reject(false);
+    /**
+     * add informer without a task
+     * @param {Promise} task
+     * @param {object} options
+     */
+    addInformer (options) {
+        return this.addTaskInformer(null, options);
     }
 
     /**
@@ -98,16 +90,33 @@ class Group extends Informer {
      * @param {object} options
      */
     addTaskInformer (task, options) {
-        this.informers.push({
-            informer: new Informer(task, options)
+        const informer = new Informer(task, options);
+        informer.status.on('change', value => {
+            this.emit('change');
         });
+        informer.status.on('end', () => {
+            this._checkEnd();
+        });
+        this.informers.push({
+            informer: informer
+        });
+        return informer;
     }
 
+    /**
+     * returns cumulative info
+     * @return {*}
+     */
     get textInfo () {
-        return this.informers
-            .map(informer => {
-                return informer.textInfo
-            });
+        const result = super.textInfo();
+        result.children = this.informers.map(informer => {
+            return informer.textInfo
+        });
+        return result;
+    }
+
+    _checkEnd () {
+        if (this.informers.every(informer => informer.isDone)) this.emit('end');
     }
 }
 

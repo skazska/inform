@@ -1,17 +1,17 @@
-const { BehaviorSubject } = require('rxjs');
-
+const EventEmitter = require('events');
 const TASK_STATUSES = ['failed', 'pending', 'in-process', 'done'];
 
 /**
  * Common task status class
  */
-class TaskStatus {
+class TaskStatus extends EventEmitter {
     /**
      * @param {number} [status]
      */
     constructor (status) {
+        super();
         this._status = status || 1;
-        this.subject = new BehaviorSubject(this.status)
+        this.isDone = false;
     }
 
     /**
@@ -28,7 +28,7 @@ class TaskStatus {
      */
     set status (status) {
         this._status = status;
-        this.subject.next(status);
+        this.emit('change', status);
     }
 
     /**
@@ -61,7 +61,8 @@ class TaskStatus {
      * finish status monitoring trigger
      */
     complete () {
-        this.subject.complete();
+        this.isDone = true;
+        this.emit('end');
     }
 
     /**
