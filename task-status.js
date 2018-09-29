@@ -28,7 +28,11 @@ class TaskStatus extends EventEmitter {
      */
     set status (status) {
         this._status = status;
-        this.emit('change', status);
+        try {
+            this.emit('change', status);
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     /**

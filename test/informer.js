@@ -35,7 +35,9 @@ describe('Informer', () => {
             expect(informer.statusText).to.be.equal('waiting');
             expect(informer.textInfo).to.be.eql({status: 'waiting', text: 'it'});
         });
-        it('should change texts on status change 1', (done) => {
+    });
+    describe('@status, @statusText, @textInfo', () => {
+        it('should change on task set and then fail', (done) => {
             const promise = new Promise((resolve, reject )=> setImmediate(reject, new Error('error')));
             const informer = new Informer(null, {
                 failText: 'damn',
@@ -55,13 +57,13 @@ describe('Informer', () => {
             }
 
             check(1);
-            informer.status.on('change', check);
-            informer.status.on('end', check.bind(0));
-            informer.status.on('end', done);
+            informer.on('change', check);
+            informer.on('end', check.bind(this, 0));
+            informer.on('end', done);
 
             informer.task = promise;
         });
-        it('should change texts on status change 2', (done) => {
+        it('should change on task done', (done) => {
             const promise = new Promise(resolve => setImmediate(resolve, 'bingo'));
             const informer = new Informer(promise, {
                 failText: 'damn',
@@ -80,10 +82,10 @@ describe('Informer', () => {
                 expect(informer.textInfo).to.be.eql({status: informer.statusText, text: 'it'});
             }
 
-            check(1);
-            informer.status.on('change', check);
-            informer.status.on('end', check.bind(3));
-            informer.status.on('end', done);
+            check(2);
+            informer.on('change', check);
+            informer.on('end', check.bind(this, 3));
+            informer.on('end', done);
         });
     });
 });

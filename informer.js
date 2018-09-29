@@ -1,10 +1,9 @@
-const EventEmitter = require('events');
 const TaskStatus = require('./task-status');
 
 /**
  * produces text info for task
  */
-class Informer extends EventEmitter {
+class Informer extends TaskStatus {
     /**
      * @typedef {Object} Informer~Options
      * @property {string} failText - .
@@ -27,24 +26,7 @@ class Informer extends EventEmitter {
             options.doneText || TaskStatus.statusName(3)
         ];
 
-        this.taskStatus = new TaskStatus();
         if (task) this.task = task;
-    }
-
-    /**
-     * informer's task setter
-     * @param task
-     */
-    set task (task) {
-        this.taskStatus.task = task;
-    }
-
-    /**
-     * informer's task status
-     * @return {number}
-     */
-    get status () {
-        return (this.taskStatus && this.taskStatus.status);
     }
 
     /**
@@ -65,8 +47,6 @@ class Informer extends EventEmitter {
             text: this.text
         }
     }
-
-
 }
 
 class Group extends Informer {
@@ -76,30 +56,24 @@ class Group extends Informer {
     }
 
     /**
-     * add informer without a task
-     * @param {Promise} task
-     * @param {object} options
-     */
-    addInformer (options) {
-        return this.addTaskInformer(null, options);
-    }
-
-    /**
      * add informer for a task
      * @param {Promise} task
      * @param {object} options
      */
-    addTaskInformer (task, options) {
+    addInformer (task, options) {
         const informer = new Informer(task, options);
-        informer.status.on('change', value => {
-            this.emit('change');
+        if (informer.status === 2 && this.status === 1) this.status = 2;
+        informer.on('change', value => {
+            if (informer.status === 2 && this.status === 1) {
+                this.status = 2; // <-- this will emit 'change'
+            } else if (value !== 0) {
+                this.emit('change', this.status);
+            }
         });
-        informer.status.on('end', () => {
+        informer.on('end', () => {
             this._checkEnd();
         });
-        this.informers.push({
-            informer: informer
-        });
+        this.informers.push(informer);
         return informer;
     }
 
@@ -108,7 +82,7 @@ class Group extends Informer {
      * @return {*}
      */
     get textInfo () {
-        const result = super.textInfo();
+        const result = super.textInfo;
         result.children = this.informers.map(informer => {
             return informer.textInfo
         });
