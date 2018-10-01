@@ -1,6 +1,11 @@
+const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
+const sinonChai = require("sinon-chai");
+chai.use(sinonChai);
+
+
 const expect = chai.expect;
 
 const { Group } = require('../informer');
@@ -13,7 +18,18 @@ describe('Group', () => {
         doneText: 'did',
         text: 'it'
     };
-    xdescribe('#constructor(options)', () => {
+
+    function createCheck (group, statuses, statusTexts, childrens) {
+        return (value) => {
+            expect(value).equal(statuses.pop());
+            expect(group.status).to.be.equal(value);
+            expect(group.statusText).to.be.equal(statusTexts.pop());
+            expect(group.textInfo).to.include({status: group.statusText, text: 'it'});
+            expect(group.textInfo.children).to.eql(childrens.pop());
+        }
+    }
+
+    describe('#constructor(options)', () => {
         it('should return instance having status statusText for (pending) status, textInfo should include children array', () => {
             const group = new Group(options);
 
@@ -22,7 +38,7 @@ describe('Group', () => {
             expect(group.textInfo).to.be.eql({status: 'waiting', text: 'it', children: []});
         });
     });
-    xdescribe('#addInformer', () => {
+    describe('#addInformer', () => {
         it('should allow add informer which info appear in children of textInfo', () => {
             const group = new Group(options);
             const promise = new Promise((resolve, reject )=> setImmediate(reject, new Error('error')));
@@ -49,33 +65,32 @@ describe('Group', () => {
             });
         });
     });
-    xdescribe('@status, @statusText, @textInfo', () => {
+    describe('@status, @statusText, @textInfo', () => {
         it('should change status on child status change', (done) => {
             const group = new Group(options);
             const informer = group.addInformer(null, options);
             group.addInformer(null, options);
-
-            const statuses = [2, 2, 1];
-            const statusTexts = ['doing', 'doing', 'waiting'];
-            const childrens = [
-                [{status: 'done', text: 'it'}, {status: 'waiting', text: 'it'}],
-                [{status: 'doing', text: 'it'}, {status: 'waiting', text: 'it'}],
-                [{status: 'waiting', text: 'it'}, {status: 'waiting', text: 'it'}]
-            ];
-
-            function check (value) {
-                expect(value).equal(statuses.pop());
-                expect(group.status).to.be.equal(value);
-                expect(group.statusText).to.be.equal(statusTexts.pop());
-                expect(group.textInfo).to.include({status: group.statusText, text: 'it'});
-                expect(group.textInfo.children).to.eql(childrens.pop());
-            }
-
+            const check = createCheck(
+                group,
+                [2, 2, 1],
+                ['doing', 'doing', 'waiting'],
+                [
+                    [{status: 'done', text: 'it'}, {status: 'waiting', text: 'it'}],
+                    [{status: 'doing', text: 'it'}, {status: 'waiting', text: 'it'}],
+                    [{status: 'waiting', text: 'it'}, {status: 'waiting', text: 'it'}]
+                ]
+            );
             check(1);
-            group.on('change', check);
+
+            const handler = sinon.spy();
+            group.on('change', handler);
 
             informer.task = new Promise((resolve, reject )=> setImmediate(resolve, 'done'));
-            informer.on('end', done);
+
+            group.on('end', () => {
+
+                done();
+            });
         });
     });
     describe('event complete', () => {
@@ -104,7 +119,7 @@ describe('Group', () => {
             }
 
             check(2);
-            // group.on('change', check);
+            group.on('change', check);
 
             group.on('end', check.bind(this, 3));
             group.on('end', done);

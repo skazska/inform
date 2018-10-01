@@ -90,7 +90,10 @@ class Group extends Informer {
     }
 
     _checkEnd () {
-        if (this.informers.every(informer => informer.isDone)) this.emit('end');
+        if (this.informers.every(informer => informer.isDone)) {
+            this._status = 3;
+            this.emit('end');
+        }
     }
 }
 
