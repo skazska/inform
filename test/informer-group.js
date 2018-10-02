@@ -5,7 +5,6 @@ chai.use(chaiAsPromised);
 const sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
-
 const expect = chai.expect;
 
 const { Group } = require('../informer');
@@ -88,6 +87,10 @@ describe('Group', () => {
             informer.task = new Promise((resolve, reject )=> setImmediate(resolve, 'done'));
 
             group.on('end', () => {
+                expect(handler.callCount).to.equal(3);
+                handler.args.forEach((args) => {
+
+                });
 
                 done();
             });

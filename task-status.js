@@ -28,7 +28,7 @@ class TaskStatus extends EventEmitter {
      */
     set status (status) {
         this._status = status;
-        this.emit('change', status);
+        this.emit('change', this._composeChangeEvent());
     }
 
     /**
@@ -46,6 +46,17 @@ class TaskStatus extends EventEmitter {
     set task (task) {
         this.status = 2;
         this.taskStatusMonitor(task);
+    }
+
+    /**
+     * composes change event
+     * @private
+     */
+    _composeChangeEvent () {
+        return {
+            status: this.status,
+            statusName: this.statusName
+        }
     }
 
     /**
