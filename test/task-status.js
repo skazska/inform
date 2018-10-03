@@ -48,22 +48,22 @@ describe('TaskStatus', () => {
                 const handler = sinon.spy();
                 pts.on('change', handler);
                 pts.on('end', () => {
-                    resolve({handler: handler})
+                    resolve({handler: handler, pts: pts})
                 });
 
                 pts.task = new Promise((resolve) => { setImmediate(()=> { resolve('data'); }); });
 
-            }).then((data) => {
-                expect(data.handler.callCount).to.be.equal(2);
-                data.handler.args.forEach((args) => {
-                    expect(args[0].status).to.be.equal(statuses.pop());
-                    expect(args[0].statusName).to.be.equal(statusNames.pop());
-                });
-                expect(pts.status).equal(3);
-                expect(pts.statusName).equal('done');
             });
 
-            return expect(promise).to.be.fulfilled;
+            return Promise.all([
+                expect(promise).to.eventually.nested.include({'handler.callCount': 2}),
+                expect(promise).to.eventually.nested.include({'handler.args[0][0].status': statuses.pop()}),
+                expect(promise).to.eventually.nested.include({'handler.args[0][0].statusName': statusNames.pop()}),
+                expect(promise).to.eventually.nested.include({'handler.args[1][0].status': statuses.pop()}),
+                expect(promise).to.eventually.nested.include({'handler.args[1][0].statusName': statusNames.pop()}),
+                expect(promise).to.eventually.nested.include({'pts.status': 3}),
+                expect(promise).to.eventually.nested.include({'pts.statusName': 'done'})
+            ]);
         });
         it('should it should get last status right after sunscribe and have status 0 on promise reject', () => {
             const promise = new Promise((resolve, reject) => { setImmediate(()=>{ reject(new Error('error')); }); });
@@ -76,17 +76,17 @@ describe('TaskStatus', () => {
                 const handler = sinon.spy();
                 pts.on('change', handler);
                 pts.on('end', () => {
-                    resolve(handler)
+                    resolve({handler: handler, pts: pts});
                 });
-            }).then(handler => {
-                expect(handler.args[0][0].status).equal(0);
-                expect(handler.args[0][0].statusName).equal('failed');
-
-                expect(pts.status).equal(0);
-                expect(pts.statusName).equal('failed');
             });
 
-            return expect(result).to.be.fulfilled;
+            return Promise.all([
+                expect(result).to.eventually.nested.include({'handler.callCount': 1}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].status': 0}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].statusName': 'failed'}),
+                expect(result).to.eventually.nested.include({'pts.status': 0}),
+                expect(result).to.eventually.nested.include({'pts.statusName': 'failed'}),
+            ]);
         });
         it('should have no effect on passed promise process chain', () => {
             const promise = new Promise((resolve) => {
@@ -105,9 +105,11 @@ describe('TaskStatus', () => {
                     return 'done';
                 });
 
-            expect(pts.promise).to.eventually.equal(3);
-            expect(promise).to.eventually.equal('data');
-            return expect(result).to.eventually.equal('done');
+            return Promise.all([
+                expect(pts.promise).to.eventually.equal(3),
+                expect(promise).to.eventually.equal('data'),
+                expect(result).to.eventually.equal('done')
+            ]);
         });
     });
 
