@@ -1,6 +1,6 @@
 const logUpdate = require('log-update');
 
-const { Group } = require('./informer');
+const Group = require('./group');
 
 class Inform {
     constructor (text) {
@@ -8,15 +8,31 @@ class Inform {
         this.addGroup(text);
     }
 
-    get group () {
+    /**
+     * @return {Group}
+     */
+    get mainGroup () {
         if (!this.groups.length) return;
         return this.groups[0];
     }
 
     addGroup (text) {
         const group = new Group(text);
+        group.on('change', (event) => {
+            this.render();
+        });
         this.groups.push(group);
         return group;
+    }
+
+    renderText () {
+        const text = this.groups
+            .map(group => {
+                return group.textInfo.statusText + ' - ' + group.textInfo.text + '\n' +
+                    group.textInfo.children.map(info => {
+                        return '  ' + info.statusText + ' - ' + info.text;
+                    }).join('\n');
+            }).join('\n\n');
     }
 
     render () {
@@ -24,9 +40,8 @@ class Inform {
         const info = this.groups.map(group => {
             
         });
-        logUpdate()
+        logUpdate(this.renderText());
     }
 }
 
-
-ex
+module.exports = Inform;

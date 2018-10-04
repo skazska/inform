@@ -43,7 +43,7 @@ class Informer extends TaskStatus {
      */
     get textInfo () {
         return {
-            status: this.statusText,
+            statusText: this.statusText,
             text: this.text
         }
     }
@@ -53,7 +53,7 @@ class Informer extends TaskStatus {
      * @private
      */
     _composeChangeEvent () {
-        return this.textInfo;
+        return Object.assign(this.textInfo, super._composeChangeEvent());
     }
 }
 

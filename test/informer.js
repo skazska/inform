@@ -23,7 +23,7 @@ describe('Informer', () => {
 
             expect(informer.status).to.be.equal(2);
             expect(informer.statusText).to.be.equal('doing');
-            expect(informer.textInfo).to.be.eql({status: 'doing', text: 'it'});
+            expect(informer.textInfo).to.be.eql({statusText: 'doing', text: 'it'});
             return expect(promise).to.be.fulfilled;
         });
         it('should return instance having status statusText and textInfo for (pending) status when created without task', () => {
@@ -37,7 +37,7 @@ describe('Informer', () => {
 
             expect(informer.status).to.be.equal(1);
             expect(informer.statusText).to.be.equal('waiting');
-            expect(informer.textInfo).to.be.eql({status: 'waiting', text: 'it'});
+            expect(informer.textInfo).to.be.eql({statusText: 'waiting', text: 'it'});
         });
     });
     describe('@status, @statusText, @textInfo', () => {
@@ -52,7 +52,7 @@ describe('Informer', () => {
             });
             expect(informer.status).equal(1);
             expect(informer.statusText).to.be.equal('waiting');
-            expect(informer.textInfo).to.be.eql({status: 'waiting', text: 'it'});
+            expect(informer.textInfo).to.be.eql({statusText: 'waiting', text: 'it'});
 
             const result = new Promise(resolve => {
                 const handler = sinon.spy();
@@ -66,9 +66,9 @@ describe('Informer', () => {
 
             return Promise.all([
                 expect(result).to.eventually.nested.include({'handler.callCount': 2}),
-                expect(result).to.eventually.nested.include({'handler.args[0][0].status': 'doing'}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].text': 'it'}),
-                expect(result).to.eventually.nested.include({'handler.args[1][0].status': 'damn'}),
+                expect(result).to.eventually.nested.include({'handler.args[1][0].statusText': 'damn'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].text': 'it'}),
                 expect(result).to.eventually.nested.include({'informer.status': 0}),
                 expect(result).to.eventually.nested.include({'informer.statusName': 'failed'})
@@ -85,7 +85,7 @@ describe('Informer', () => {
             });
             expect(informer.status).equal(2);
             expect(informer.statusText).to.be.equal('doing');
-            expect(informer.textInfo).to.be.eql({status: 'doing', text: 'it'});
+            expect(informer.textInfo).to.be.eql({statusText: 'doing', text: 'it'});
 
             const result = new Promise(resolve => {
                 const handler = sinon.spy();
@@ -97,7 +97,7 @@ describe('Informer', () => {
 
             return Promise.all([
                 expect(result).to.eventually.nested.include({'handler.callCount': 1}),
-                expect(result).to.eventually.nested.include({'handler.args[0][0].status': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].statusText': 'did'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].text': 'it'}),
                 expect(result).to.eventually.nested.include({'informer.status': 3}),
                 expect(result).to.eventually.nested.include({'informer.statusName': 'done'})

@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/skazska/inform#readme",
   "dependencies": {
-    "rxjs": "^6.3.2"
+    "log-update": "^2.3.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
