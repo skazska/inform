@@ -2,7 +2,7 @@ const Inform = require('./index');
 
 const inform = new Inform('main');
 const group = inform.mainGroup;
-const informer = group.addInformer(null, {
+const informer = group.addInformer(new Promise((resolve, reject ) => setTimeout(() => {reject(new Error('done'))}, 100)), {
     failText: 'damn',
     pendingText: 'waiting',
     inProcessText: 'doing',
