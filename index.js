@@ -5,7 +5,7 @@ const Group = require('./group');
 class Inform {
     constructor (text) {
         this.groups = [];
-        this.addGroup(text);
+        this.addGroup({text: text});
     }
 
     /**
@@ -16,8 +16,13 @@ class Inform {
         return this.groups[0];
     }
 
-    addGroup (text) {
-        const group = new Group(text);
+    /**
+     *
+     * @param {Informer~Options} options
+     * @return {Group}
+     */
+    addGroup (options) {
+        const group = new Group(options);
         group.on('change', (event) => {
             this.render();
         });
@@ -33,6 +38,7 @@ class Inform {
                         return '  ' + info.statusText + ' - ' + info.text;
                     }).join('\n');
             }).join('\n\n');
+        return text;
     }
 
     render () {
