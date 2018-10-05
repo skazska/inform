@@ -8,7 +8,7 @@ class Group extends Informer {
         this.informerChangeHandler = (value) => {
             if (value.status === 2 && this.status === 1) {
                 this.status = 2; // <-- this will emit 'change'
-            } else /*if (value.status !== 0)*/ {
+            } else {
                 this.emit('change', this._composeChangeEvent());
             }
         };
@@ -53,7 +53,7 @@ class Group extends Informer {
             informer.removeListener('end', this.informerEndHandler);
         });
         this._status = 0;
-        this.emit('end');
+        this.complete();
     }
 
     /**
@@ -63,7 +63,7 @@ class Group extends Informer {
     _checkEnd () {
         if (this.informers.every(informer => informer.isDone)) {
             this._status = 3;
-            this.emit('end');
+            this.complete();
         }
     }
 }

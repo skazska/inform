@@ -35,3 +35,7 @@ const informer2 = group.addInformer(null, {
 setTimeout(() => {
     informer2.task = promise2;
 }, 500);
+
+inform.promise.then(() => {
+    console.log('resolved')
+})
