@@ -116,11 +116,11 @@ function promisedTaskMonitor (task) {
     this.promise = task
         .then(data => {
             this.status = STATUS.DONE;
-            return data;
+            return this.status;
         })
         .catch(err => {
             this.status = STATUS.FAILED;
-            return err;
+            return this.status;
         });
 }
 
