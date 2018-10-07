@@ -29,7 +29,7 @@ class Inform {
      * @return {Group}
      */
     addGroup (options) {
-        const group = new Group(options);
+        const group = new Group(null, options);
         group.on('change', (event) => {
             this.render();
         });
@@ -60,7 +60,7 @@ class Inform {
             .map(group => {
                 return group.textInfo.statusText + ' - ' + group.textInfo.text + '\n' +
                     group.textInfo.children.map(info => {
-                        return '  ' + info.statusText + ' - ' + info.text;
+                        return '  ' + info.statusText + ' - ' + info.text + '\n        ' + info.info;
                     }).join('\n');
             }).join('\n\n');
         return text;

@@ -1,8 +1,8 @@
 const Informer = require('./informer');
 
 class Group extends Informer {
-    constructor (options) {
-        super(null, options);
+    constructor (task, options) {
+        super(task, options);
         this.informers = [];
 
         this.informerChangeHandler = (value) => {
@@ -47,14 +47,15 @@ class Group extends Informer {
     /**
      * unsubscribe from all informers, and set own status to fail
      */
-    abort () {
+    failed (info) {
         this.informers.forEach(informer => {
             informer.removeListener('change', this.informerChangeHandler);
             informer.removeListener('end', this.informerEndHandler);
         });
-        this._status = 0;
-        this.complete();
+        super.failed(info);
     }
+
+
 
     /**
      * checks if all informers are done then sets staus 3 and fire 'end'

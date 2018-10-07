@@ -10,20 +10,88 @@ const expect = chai.expect;
 const TaskStatus = require('../task-status');
 
 describe('TaskStatus', () => {
-    function createCheck (statuses, statusNames) {
-        return (value, self) => {
-            expect(value).equal(statuses.pop());
-            expect(self.status).to.be.equal(value);
-            expect(self.statusName).to.be.equal(statusNames.pop());
-        }
-    }
-
-    describe('TaskStatus', () => {
+    describe('#constructor', () => {
         it('should have status 1 (pending) when instantiated without task)', () => {
             const pts = new TaskStatus();
             expect(pts.status).equal(1);
             expect(pts.statusName).equal('pending');
         });
+    });
+
+    describe('status setter', () => {
+        it('should fire "change" event on status set)', () => {
+            const pts = new TaskStatus();
+            expect(pts.status).equal(1);
+            const handler = sinon.spy();
+            const handler2 = sinon.spy();
+            pts.on('change', handler);
+            pts.on('end', handler2);
+            pts.status = 2;
+            pts.status = 3;
+            pts.status = 0;
+            expect(handler).to.nested.include({'callCount': 3});
+            expect(handler).to.nested.include({'args[0][0].status': 2});
+            expect(handler).to.nested.include({'args[0][0].statusName': 'in-process'});
+            expect(handler).to.nested.include({'args[1][0].status': 3});
+            expect(handler).to.nested.include({'args[1][0].statusName': 'done'});
+            expect(handler).to.nested.include({'args[2][0].status': 0});
+            expect(handler).to.nested.include({'args[2][0].statusName': 'failed'});
+            expect(handler2).to.nested.include({'callCount': 2});
+        });
+    });
+
+    describe('#inProcess()', () => {
+        it('should set status to 2 fire "change" ', () => {
+            const pts = new TaskStatus();
+            expect(pts.status).equal(1);
+            const handler = sinon.spy();
+            pts.on('change', handler);
+            pts.inProcess();
+            expect(handler).to.nested.include({'callCount': 1});
+            expect(handler).to.nested.include({'args[0][0].status': 2});
+            expect(handler).to.nested.include({'args[0][0].statusName': 'in-process'});
+        });
+    });
+
+    describe('#done()', () => {
+        it('should set status to 3 isDone to true and fire "change" and "end"', () => {
+            const pts = new TaskStatus();
+            expect(pts.status).equal(1);
+            const handler = sinon.spy();
+            const handler2 = sinon.spy();
+            pts.on('change', handler);
+            pts.on('end', handler2);
+            pts.done();
+            expect(handler).to.nested.include({'callCount': 1});
+            expect(handler).to.nested.include({'args[0][0].status': 3});
+            expect(handler).to.nested.include({'args[0][0].statusName': 'done'});
+            expect(handler2).to.nested.include({'callCount': 1});
+            expect(pts.status).to.equal(3);
+            expect(pts.statusName).to.equal('done');
+            expect(pts.isDone).to.equal(true);
+        });
+    });
+
+    describe('#failed()', () => {
+        it('should set status to 0 isDone to true and fire "change" and "end"', () => {
+            const pts = new TaskStatus();
+            expect(pts.status).equal(1);
+            const handler = sinon.spy();
+            const handler2 = sinon.spy();
+            pts.on('change', handler);
+            pts.on('end', handler2);
+            pts.failed();
+            expect(handler).to.nested.include({'callCount': 1});
+            expect(handler).to.nested.include({'args[0][0].status': 0});
+            expect(handler).to.nested.include({'args[0][0].statusName': 'failed'});
+            expect(handler2).to.nested.include({'callCount': 1});
+            expect(pts.status).to.equal(0);
+            expect(pts.statusName).to.equal('failed');
+            expect(pts.isDone).to.equal(true);
+        });
+    });
+
+    describe('work with promise task', function() {
         it('should change status 2 (in-process) when promise task is set through setter)', () => {
             const pts = new TaskStatus();
             expect(pts.status).equal(1);
@@ -65,7 +133,7 @@ describe('TaskStatus', () => {
                 expect(promise).to.eventually.nested.include({'pts.statusName': 'done'})
             ]);
         });
-        it('should it should get last status right after sunscribe and have status 0 on promise reject', () => {
+        it('should get last status right after subscribe and have status 0 on promise reject', () => {
             const promise = new Promise((resolve, reject) => { setImmediate(()=>{ reject(new Error('error')); }); });
             const pts = new TaskStatus();
             pts.task = promise;
