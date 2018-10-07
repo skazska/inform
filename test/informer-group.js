@@ -24,7 +24,7 @@ describe('Group', () => {
 
             expect(group.status).to.be.equal(1);
             expect(group.statusText).to.be.equal('waiting');
-            expect(group.textInfo).to.be.eql({statusText: 'waiting', text: 'it', children: []});
+            expect(group.textInfo).to.be.eql({statusText: 'waiting', text: 'it', info: '', children: []});
         });
     });
     describe('#addInformer', () => {
@@ -36,8 +36,8 @@ describe('Group', () => {
             expect(group.status).to.be.equal(2);
             expect(group.statusText).to.be.equal('doing');
             expect(group.textInfo).to.be.eql({
-                statusText: 'doing', text: 'it', children: [
-                    {statusText: 'doing', text: 'it'}
+                statusText: 'doing', text: 'it', info: '', children: [
+                    {statusText: 'doing', text: 'it', info: ''}
                 ]
             });
         });
@@ -48,8 +48,8 @@ describe('Group', () => {
             expect(group.status).to.be.equal(1);
             expect(group.statusText).to.be.equal('waiting');
             expect(group.textInfo).to.be.eql({
-                statusText: 'waiting', text: 'it', children: [
-                    {statusText: 'waiting', text: 'it'}
+                statusText: 'waiting', text: 'it', info: '', children: [
+                    {statusText: 'waiting', text: 'it', info: ''}
                 ]
             });
         });
@@ -61,7 +61,10 @@ describe('Group', () => {
             group.addInformer(null, options);
             expect(group.status).equal(1);
             expect(group.statusText).to.be.equal('waiting');
-            expect(group.textInfo.children).to.be.eql([{statusText: 'waiting', text: 'it'}, {statusText: 'waiting', text: 'it'}]);
+            expect(group.textInfo.children).to.be.eql([
+                {statusText: 'waiting', text: 'it', info: ''},
+                {statusText: 'waiting', text: 'it', info: ''}
+            ]);
 
             const result = new Promise(resolve => {
                 const handler = sinon.spy();
@@ -77,14 +80,17 @@ describe('Group', () => {
                 expect(result).to.eventually.nested.include({'handler.callCount': 2}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].text': 'it'}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].info': ''}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].text': 'it'}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].info': ''}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[1].statusText': 'waiting'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[1].text': 'it'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].text': 'it'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].statusText': 'did'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].text': 'it'}),
+                expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].info': 'done'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[1].statusText': 'waiting'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[1].text': 'it'}),
                 expect(result).to.eventually.nested.include({'group.status': 2}),
@@ -102,7 +108,9 @@ describe('Group', () => {
 
             expect(group.status).equal(2);
             expect(group.statusText).to.be.equal('doing');
-            expect(group.textInfo.children).to.be.eql([{statusText: 'doing', text: 'it'}, {statusText: 'waiting', text: 'it'}]);
+            expect(group.textInfo.children).to.be.eql([
+                {statusText: 'doing', text: 'it', info: ''},
+                {statusText: 'waiting', text: 'it', info: ''}]);
 
 
             const result = new Promise(resolve => {
@@ -122,10 +130,14 @@ describe('Group', () => {
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[1].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].info': 'done'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[1].statusText': 'doing'}),
+                expect(result).to.eventually.nested.include({'handler.args[1][0].children[1].info': ''}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[0].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].children[0].info': 'done'}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].info': 'done'}),
                 expect(result).to.eventually.nested.include({'group.status': 3}),
                 expect(result).to.eventually.nested.include({'group.statusText': 'did'})
 
@@ -145,7 +157,10 @@ describe('Group', () => {
 
             expect(group.status).equal(2);
             expect(group.statusText).to.be.equal('doing');
-            expect(group.textInfo.children).to.be.eql([{statusText: 'doing', text: 'it'}, {statusText: 'waiting', text: 'it'}]);
+            expect(group.textInfo.children).to.be.eql([
+                {statusText: 'doing', text: 'it', info: ''},
+                {statusText: 'waiting', text: 'it', info: ''}
+            ]);
 
 
             const result = new Promise(resolve => {
@@ -162,13 +177,19 @@ describe('Group', () => {
                 expect(result).to.eventually.nested.include({'handler.callCount': 3}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].statusText': 'doing'}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].info': ''}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[1].statusText': 'doing'}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].children[1].info': ''}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].statusText': 'damn'}),
+                expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].info': 'done'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[1].statusText': 'doing'}),
+                expect(result).to.eventually.nested.include({'handler.args[1][0].children[1].info': ''}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[0].statusText': 'damn'}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].children[0].info': 'done'}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].info': 'done'}),
                 expect(result).to.eventually.nested.include({'group.status': 3}),
                 expect(result).to.eventually.nested.include({'group.statusText': 'did'})
 
@@ -176,7 +197,7 @@ describe('Group', () => {
         });
 
     });
-    describe('abort', () => {
+    describe('failed', () => {
         it('should set own status to 0 and stop firing events', () => {
             const group = new Group(null, options);
             const promise1 = new Promise((resolve, reject )=> setImmediate(reject, new Error('done')));
@@ -185,14 +206,17 @@ describe('Group', () => {
 
             const promise2 = new Promise((resolve, reject ) => {
                 informer1.on('end', () => {
-                    group.abort();
+                    group.failed('failed');
                     setImmediate(resolve, 'done');
                 });
             });
 
             expect(group.status).equal(2);
             expect(group.statusText).to.be.equal('doing');
-            expect(group.textInfo.children).to.be.eql([{statusText: 'doing', text: 'it'}, {statusText: 'waiting', text: 'it'}]);
+            expect(group.textInfo.children).to.be.eql([
+                {statusText: 'doing', text: 'it', info: ''},
+                {statusText: 'waiting', text: 'it', info: ''}
+            ]);
 
             const result = new Promise(resolve => {
                 const handler = sinon.spy();
@@ -205,15 +229,26 @@ describe('Group', () => {
             informer2.task = promise2;
 
             return Promise.all([
-                expect(result).to.eventually.nested.include({'handler.callCount': 2}),
+                expect(result).to.eventually.nested.include({'handler.callCount': 3}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].statusText': 'doing'}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].info': ''}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[1].statusText': 'doing'}),
+                expect(result).to.eventually.nested.include({'handler.args[0][0].children[1].info': ''}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].statusText': 'damn'}),
+                expect(result).to.eventually.nested.include({'handler.args[1][0].children[0].info': 'done'}),
                 expect(result).to.eventually.nested.include({'handler.args[1][0].children[1].statusText': 'doing'}),
+                expect(result).to.eventually.nested.include({'handler.args[1][0].children[1].info': ''}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].statusText': 'damn'}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].info': 'failed'}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].children[0].statusText': 'damn'}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].children[0].info': 'done'}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].info': ''}),
+                expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'group.status': 0}),
-                expect(result).to.eventually.nested.include({'group.statusText': 'damn'})
+                expect(result).to.eventually.nested.include({'group.statusText': 'damn'}),
+                expect(result).to.eventually.nested.include({'group.info': 'failed'})
 
             ]);
         });
