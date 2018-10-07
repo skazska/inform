@@ -20,7 +20,7 @@ describe('Group', () => {
 
     describe('#constructor(options)', () => {
         it('should return instance having status statusText for (pending) status, textInfo should include children array', () => {
-            const group = new Group(options);
+            const group = new Group(null, options);
 
             expect(group.status).to.be.equal(1);
             expect(group.statusText).to.be.equal('waiting');
@@ -29,7 +29,7 @@ describe('Group', () => {
     });
     describe('#addInformer', () => {
         it('should allow add informer which info appear in children of textInfo', () => {
-            const group = new Group(options);
+            const group = new Group(null, options);
             const promise = new Promise((resolve, reject )=> setImmediate(reject, new Error('error')));
             group.addInformer(promise, options);
 
@@ -42,7 +42,7 @@ describe('Group', () => {
             });
         });
         it('should allow add informer without task which info appear in children of textInfo', () => {
-            const group = new Group(options);
+            const group = new Group(null, options);
             group.addInformer(null, options);
 
             expect(group.status).to.be.equal(1);
@@ -56,7 +56,7 @@ describe('Group', () => {
     });
     describe('@status, @statusText, @textInfo', () => {
         it('should change status on child status change', () => {
-            const group = new Group(options);
+            const group = new Group(null, options);
             const informer = group.addInformer(null, options);
             group.addInformer(null, options);
             expect(group.status).equal(1);
@@ -95,7 +95,7 @@ describe('Group', () => {
     });
     describe('event complete', () => {
         it('should fire as all children complete', () => {
-            const group = new Group(options);
+            const group = new Group(null, options);
             const promise1 = new Promise((resolve, reject )=> setImmediate(resolve, 'done'));
             group.addInformer(promise1, options);
             const informer2 = group.addInformer(null, options);
@@ -132,7 +132,7 @@ describe('Group', () => {
             ]);
         });
         it('should fire as all children complete no interruption on some informers fail', () => {
-            const group = new Group(options);
+            const group = new Group(null, options);
             const promise1 = new Promise((resolve, reject ) => setImmediate(reject, new Error('done')));
             const promise2 = new Promise((resolve, reject ) => {
                 promise1.catch(() => {
@@ -178,7 +178,7 @@ describe('Group', () => {
     });
     describe('abort', () => {
         it('should set own status to 0 and stop firing events', () => {
-            const group = new Group(options);
+            const group = new Group(null, options);
             const promise1 = new Promise((resolve, reject )=> setImmediate(reject, new Error('done')));
             const informer1 = group.addInformer(promise1, options);
             const informer2 = group.addInformer(null, options);

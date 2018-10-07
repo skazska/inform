@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const TASK_STATUSES = ['failed', 'pending', 'in-process', 'done'];
+const {STATUSES, STATUS} = require('./constants');
 
 /**
  * Common task status class
@@ -10,7 +10,7 @@ class TaskStatus extends EventEmitter {
      */
     constructor (status) {
         super();
-        this._status = status || 1;
+        this._status = status || STATUS.PENDING;
         this.isDone = false;
     }
 
@@ -29,6 +29,7 @@ class TaskStatus extends EventEmitter {
     set status (status) {
         this._status = status;
         this.emit('change', this._composeChangeEvent());
+        if (status === STATUS.FAILED || status === STATUS.DONE) this.complete();
     }
 
     /**
@@ -44,7 +45,7 @@ class TaskStatus extends EventEmitter {
      * @param {*} task
      */
     set task (task) {
-        this.status = 2;
+        this.status = STATUS.IN_PROCESS;
         this.taskStatusMonitor(task);
     }
 
@@ -69,6 +70,27 @@ class TaskStatus extends EventEmitter {
     }
 
     /**
+     * sets IN_PROCESS status
+     */
+    inProcess () {
+        this.status = STATUS.IN_PROCESS;
+    }
+
+    /**
+     * sets DONE status
+     */
+    done () {
+        this.status = STATUS.DONE;
+    }
+
+    /**
+     * sets FAILED status
+     */
+    failed () {
+        this.status = STATUS.FAILED;
+    }
+
+    /**
      * finish status monitoring trigger
      */
     complete () {
@@ -82,7 +104,7 @@ class TaskStatus extends EventEmitter {
      * @return {string}
      */
     static statusName (status) {
-        return TASK_STATUSES[status];
+        return STATUSES[status];
     }
 }
 
@@ -93,14 +115,12 @@ function promisedTaskMonitor (task) {
     //there is no effect on original promise, as no insertion in then/catch chain happening, keep in this.promise for test purposes
     this.promise = task
         .then(data => {
-            this.status = 3;
-            this.complete();
-            return this.status;
+            this.status = STATUS.DONE;
+            return data;
         })
         .catch(err => {
-            this.status = 0;
-            this.complete();
-            return this.status;
+            this.status = STATUS.FAILED;
+            return err;
         });
 }
 
