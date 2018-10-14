@@ -7,7 +7,7 @@ const Group = require('./group');
 class Inform {
     constructor (text) {
         this.groups = [];
-        this.addGroup({text: text});
+        this.addGroup(null, {text: text});
         this._promise = new Promise((resolve) => {
             this._complete = () => {
                 resolve();
@@ -28,8 +28,8 @@ class Inform {
      * @param {Informer~Options} options
      * @return {Group}
      */
-    addGroup (options) {
-        const group = new Group(null, options);
+    addGroup (task, options) {
+        const group = new Group(task, options);
         group.on('change', (event) => {
             this.render();
         });
