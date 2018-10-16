@@ -55,10 +55,10 @@ class TaskStatus extends EventEmitter {
      */
     get promise () {
         if (this.isDone) {
-            if (status === STATUS.FAILED) {
+            if (this.status === STATUS.FAILED) {
                 return Promise.reject(this._composeChangeError());
             }
-            if (status === STATUS.DONE) {
+            if (this.status === STATUS.DONE) {
                 return Promise.resolve(this._composeChangeEvent());
             }
         } else {
