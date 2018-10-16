@@ -2,64 +2,20 @@ const logUpdate = require('log-update');
 
 const Group = require('./group');
 
-// TODO tests for Inform, separate output, and make definable through options, exclude log-update
+// TODO add tests for Inform
 
-class Inform {
-    constructor (text) {
-        this.groups = [];
-        this.addGroup(null, {text: text});
-        this._promise = new Promise((resolve) => {
-            this._complete = () => {
-                resolve();
-            }
-        });
-    }
-
-    /**
-     * @return {Group}
-     */
-    get mainGroup () {
-        if (!this.groups.length) return;
-        return this.groups[0];
-    }
-
-    /**
-     *
-     * @param {Informer~Options} options
-     * @return {Group}
-     */
-    addGroup (task, options) {
-        const group = new Group(task, options);
-        group.on('change', (event) => {
-            this.render();
-        });
-        group.on('end', () => {
-            this._checkEnd();
-        });
-        this.groups.push(group);
-        return group;
-    }
-
-    get promise () {
-        return this._promise;
-    }
-
-    /**
-     * checks if all informers are done then sets staus 3 and fire 'end'
-     * @private
-     */
-    _checkEnd () {
-        if (this.groups.every(informer => informer.isDone)) {
-            this._status = 3;
-            this._complete();
-        }
+class Inform extends Group {
+    constructor (renderer, options) {
+        super(null, options);
+        this.renderer = renderer || logUpdate;
+        this.on('change', this.render.bind(this));
     }
 
     renderText () {
-        const text = this.groups
-            .map(group => {
-                return group.textInfo.statusText + ' - ' + group.textInfo.text + '\n' +
-                    group.textInfo.children.map(info => {
+        const text = this.informers
+            .map(informer => {
+                return informer.textInfo.statusText + ' - ' + informer.textInfo.text + '\n' +
+                    informer.textInfo.children.map(info => {
                         return '  ' + info.statusText + ' - ' + info.text + '\n        ' + info.info;
                     }).join('\n');
             }).join('\n\n');
@@ -67,11 +23,7 @@ class Inform {
     }
 
     render () {
-
-        const info = this.groups.map(group => {
-            
-        });
-        logUpdate(this.renderText());
+        this.renderer(this.renderText());
     }
 }
 

@@ -1,7 +1,13 @@
 const Inform = require('./index');
 
-const inform = new Inform('main');
-const group = inform.mainGroup;
+const inform = new Inform(null, {text: 'main'});
+const group = inform.addGroup(null, {
+    failText: 'damn',
+    pendingText: 'waiting',
+    inProcessText: 'doing',
+    doneText: 'did',
+    text: 'it'
+});
 const informer = group.addInformer(new Promise((resolve, reject ) => setTimeout(() => {reject(new Error('done'))}, 100)), {
     failText: 'damn',
     pendingText: 'waiting',
@@ -38,4 +44,4 @@ setTimeout(() => {
 
 inform.promise.then(() => {
     console.log('resolved')
-})
+});

@@ -124,7 +124,7 @@ describe('Group', () => {
             informer2.task = new Promise((resolve, reject )=> setImmediate(resolve, 'done'));
 
             return Promise.all([
-                expect(result).to.eventually.nested.include({'handler.callCount': 3}),
+                expect(result).to.eventually.nested.include({'handler.callCount': 4}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[1].statusText': 'doing'}),
@@ -138,6 +138,11 @@ describe('Group', () => {
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[0].info': 'done'}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].statusText': 'did'}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].info': 'done'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].children[0].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].children[0].info': 'done'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].children[1].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].children[1].info': 'done'}),
                 expect(result).to.eventually.nested.include({'group.status': 3}),
                 expect(result).to.eventually.nested.include({'group.statusText': 'did'})
 
@@ -174,7 +179,7 @@ describe('Group', () => {
             informer2.task = promise2;
 
             return Promise.all([
-                expect(result).to.eventually.nested.include({'handler.callCount': 3}),
+                expect(result).to.eventually.nested.include({'handler.callCount': 4}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].statusText': 'doing'}),
                 expect(result).to.eventually.nested.include({'handler.args[0][0].children[0].info': ''}),
@@ -190,6 +195,11 @@ describe('Group', () => {
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[0].info': 'done'}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].statusText': 'did'}),
                 expect(result).to.eventually.nested.include({'handler.args[2][0].children[1].info': 'done'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].children[0].statusText': 'damn'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].children[0].info': 'done'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].children[1].statusText': 'did'}),
+                expect(result).to.eventually.nested.include({'handler.args[3][0].children[1].info': 'done'}),
                 expect(result).to.eventually.nested.include({'group.status': 3}),
                 expect(result).to.eventually.nested.include({'group.statusText': 'did'})
 
@@ -253,4 +263,5 @@ describe('Group', () => {
             ]);
         });
     });
+    //TODO add addGroup tests
 });

@@ -174,11 +174,34 @@ describe('TaskStatus', () => {
                 });
 
             return Promise.all([
-                expect(pts.promise).to.eventually.equal(3),
                 expect(promise).to.eventually.equal('data'),
                 expect(result).to.eventually.equal('done')
             ]);
         });
     });
+    describe('-promise', () => {
+        it('should resolve on task done', () => {
+            const promise = new Promise((resolve) => {
+                setImmediate(resolve, 'data');
+            });
+
+            const pts = new TaskStatus();
+            pts.task = promise;
+
+            return Promise.all([
+                expect(pts.promise).to.eventually.eql({ status: 3, statusName: 'done' }),
+            ]);
+        });
+        it('should reject on fail', () => {
+            const promise = new Promise((resolve, reject) => {
+                setImmediate(reject, new Error('data'));
+            });
+
+            const pts = new TaskStatus();
+            pts.task = promise;
+
+            return expect(pts.promise).to.be.rejectedWith(Error, 'data')
+        })
+    })
 
 });

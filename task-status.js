@@ -50,6 +50,38 @@ class TaskStatus extends EventEmitter {
     }
 
     /**
+     * promise getter
+     * @return {Promise<any>}
+     */
+    get promise () {
+        if (this.isDone) {
+            if (status === STATUS.FAILED) {
+                return Promise.reject(this._composeChangeError());
+            }
+            if (status === STATUS.DONE) {
+                return Promise.resolve(this._composeChangeEvent());
+            }
+        } else {
+            if (!this._promise) this._promise = new Promise((resolve, reject) => {
+                this._promiseResolve = resolve;
+                this._promiseReject = reject;
+            });
+            return this._promise;
+        }
+    }
+
+    /**
+     * resolve of reject all promises
+     * @param {'resolve'|'reject'} fn
+     * @param {*} val
+     * @private
+     */
+    _processPromises (fn, val) {
+        fn = '_promise' + fn[0].toUpperCase() + fn.substr(1);
+        if (!!this[fn]) this[fn](val);
+    }
+
+    /**
      * composes change event
      * @private
      */
@@ -58,6 +90,17 @@ class TaskStatus extends EventEmitter {
             status: this.status,
             statusName: this.statusName
         }
+    }
+
+    /**
+     * composes change event
+     * @private
+     */
+    _composeChangeError () {
+        if (!this.error) this.error = new Error(this.statusName);
+        this.error.status = this.status;
+        this.error.statusName = this.statusName;
+        return this.error;
     }
 
     /**
@@ -95,6 +138,12 @@ class TaskStatus extends EventEmitter {
      */
     complete () {
         this.isDone = true;
+        if (this.status === STATUS.FAILED) {
+            this._processPromises ('reject', this._composeChangeError());
+        }
+        if (this.status === STATUS.DONE) {
+            this._processPromises('resolve', this._composeChangeEvent());
+        }
         this.emit('end');
     }
 
@@ -113,14 +162,14 @@ class TaskStatus extends EventEmitter {
  */
 function promisedTaskMonitor (task) {
     //there is no effect on original promise, as no insertion in then/catch chain happening, keep in this.promise for test purposes
-    this.promise = task
+    task
         .then(data => {
+            this.data = data;
             this.status = STATUS.DONE;
-            return this.status;
         })
         .catch(err => {
+            this.error = err;
             this.status = STATUS.FAILED;
-            return this.status;
         });
 }
 

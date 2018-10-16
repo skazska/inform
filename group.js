@@ -18,6 +18,13 @@ class Group extends Informer {
         }
     }
 
+    _addInformer (informer) {
+        if (informer.status === 2 && this.status === 1) this.status = 2;
+        informer.on('change', this.informerChangeHandler);
+        informer.on('end', this.informerEndHandler);
+        this.informers.push(informer);
+    }
+
     /**
      * add informer for a task
      * @param {Promise} task
@@ -25,11 +32,19 @@ class Group extends Informer {
      */
     addInformer (task, options) {
         const informer = new Informer(task, options);
-        if (informer.status === 2 && this.status === 1) this.status = 2;
-        informer.on('change', this.informerChangeHandler);
-        informer.on('end', this.informerEndHandler);
-        this.informers.push(informer);
+        this._addInformer(informer);
         return informer;
+    }
+
+    /**
+     *
+     * @param {Informer~Options} options
+     * @return {Group}
+     */
+    addGroup (task, options) {
+        const group = new Group(task, options);
+        this._addInformer(group);
+        return group;
     }
 
     /**
@@ -64,6 +79,7 @@ class Group extends Informer {
     _checkEnd () {
         if (this.informers.every(informer => informer.isDone)) {
             this._status = 3;
+            this.emit('change', this._composeChangeEvent());
             this.complete();
         }
     }
