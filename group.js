@@ -2,7 +2,7 @@ const Informer = require('./informer');
 
 class Group extends Informer {
     constructor (task, options) {
-        super(task, options);
+        super(null, options);
         this.informers = [];
 
         this.informerChangeHandler = (value) => {
@@ -15,9 +15,28 @@ class Group extends Informer {
 
         this.informerEndHandler = () => {
             this._checkEnd();
-        }
+        };
+
+        this.taskOptions = {
+            text: options.taskText|| 'main task',
+            failText: options.failText,
+            pendingText: options.pendingText,
+            inProcessText: options.inProcessText,
+            doneText: options.doneText,
+            transformInfo: options.transformInfo
+        };
+        this.task = task;
     }
 
+    set task(task) {
+        if (task) this.addInformer(task, this.taskOptions);
+    }
+
+    /**
+     * sets listentrs on informer/group and adds to list
+     * @param informer
+     * @private
+     */
     _addInformer (informer) {
         if (informer.status === 2 && this.status === 1) this.status = 2;
         informer.on('change', this.informerChangeHandler);
@@ -38,6 +57,7 @@ class Group extends Informer {
 
     /**
      *
+     * @param {Promise} task
      * @param {Informer~Options} options
      * @return {Group}
      */
