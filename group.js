@@ -56,6 +56,16 @@ class Group extends Informer {
     }
 
     /**
+     * add informer for a task, return task
+     * @param {Promise} task
+     * @param {object} options
+     */
+    wrapInformer (task, options) {
+        this.addInformer(task, options);
+        return task;
+    }
+
+    /**
      *
      * @param {Promise} task
      * @param {Informer~Options} options

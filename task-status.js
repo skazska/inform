@@ -46,7 +46,7 @@ class TaskStatus extends EventEmitter {
      */
     set task (task) {
         this.status = STATUS.IN_PROCESS;
-        this.taskStatusMonitor(task);
+        if (false === this.taskStatusMonitor(task)) throw new Error('Task type was not recognized');
     }
 
     /**
@@ -106,10 +106,11 @@ class TaskStatus extends EventEmitter {
     /**
      * returns instance of TaskStatus suitable for task type
      * @param task
-     * @return {TaskStatus}
+     * @return {Promise | boolean}
      */
     taskStatusMonitor (task) {
-        if (task instanceof Promise) promisedTaskMonitor.call(this, task);
+        if (task instanceof Promise) return promisedTaskMonitor.call(this, task);
+        return false;
     }
 
     /**
@@ -162,7 +163,7 @@ class TaskStatus extends EventEmitter {
  */
 function promisedTaskMonitor (task) {
     //there is no effect on original promise, as no insertion in then/catch chain happening, keep in this.promise for test purposes
-    task
+    return task
         .then(data => {
             this.data = data;
             this.status = STATUS.DONE;

@@ -178,6 +178,13 @@ describe('TaskStatus', () => {
                 expect(result).to.eventually.equal('done')
             ]);
         });
+        it('should throw if task type is not supported', () => {
+            const pts = new TaskStatus();
+            const setter = function() {
+                pts.task = function(err, data) {};
+            };
+            expect(setter).to.throw(Error, 'Task type was not recognized');
+        });
     });
     describe('-promise', () => {
         it('should resolve on task done', () => {

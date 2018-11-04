@@ -443,5 +443,15 @@ describe('Group', () => {
         });
     });
 
-
+    describe('#wrapInformer(task, options)', () => {
+        it('should add new Informer and return task', () => {
+            const group = new Group(null, options);
+            const promise1 = group.wrapInformer(new Promise((resolve, reject )=> setImmediate(resolve, 'done')), options);
+            expect(promise1).to.be.a('Promise');
+            expect(group.informers).to.have.property('length', 1);
+            return Promise.all([
+                expect(promise1).to.eventually.equal('done')
+            ]);
+        })
+    });
 });
