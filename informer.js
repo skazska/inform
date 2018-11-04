@@ -44,15 +44,16 @@ class Informer extends TaskStatus {
         if (task) this.task = task;
     }
 
-    set task (task) {
-        task.then((data) => {
-            this._info = this._transformInfo(data);
-            return data;
-        }).catch((err) => {
-            this._info = this._transformInfo(err.message);
-            return err;
-        });
-        super.task = task;
+    get status () {
+        return super.status;
+    }
+    set status (status) {
+        if (status === STATUS.DONE) {
+            this._info = this._transformInfo(this.data);
+        } else if (status === STATUS.FAILED) {
+            this._info = this._transformInfo(this.error.message);
+        }
+        super.status = status;
     }
 
     /**
@@ -98,7 +99,7 @@ class Informer extends TaskStatus {
      * @param {string} info
      */
     done (info) {
-        this._info = info;
+        this.data = info;
         super.done();
     }
 
@@ -107,7 +108,7 @@ class Informer extends TaskStatus {
      * @param {string} info
      */
     failed (info) {
-        this._info = info;
+        this.error = new Error(info);
         super.failed();
     }
 
