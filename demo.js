@@ -1,6 +1,6 @@
 const Inform = require('./index');
 
-const inform = new Inform(null, {text: 'main'});
+const inform = new Inform('main');
 const group = inform.addGroup(null, {
     failText: 'damn',
     pendingText: 'waiting',

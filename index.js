@@ -5,8 +5,8 @@ const Group = require('./group');
 // TODO add tests for Inform
 
 class Inform extends Group {
-    constructor (renderer, options) {
-        super(null, options);
+    constructor (text, renderer) {
+        super(null, {text: text});
         this.renderer = renderer || logUpdate;
         this.on('change', this.render.bind(this));
     }
